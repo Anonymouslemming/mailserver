@@ -75,7 +75,7 @@ Each user requires an entry in the `passwd.db` file. This file uses the followin
 
 Users can generate a hash by running `doveadm pw -s SSHA512` which is available in the dovecot-core package. You will need to install this somewhere that your users can run the command.
 
-An example entry for _myuser@mydomain.com_ would be
+An example entry for _myuser@mydomain.com_ would be  
 `myuser@mydomain.com:{SSHA512}OeR5ulGD3LZ0OHuj9muNqSvKB7hxsxnTquSd8AjK8QXrtOAGqxhxdRs093Czcua=`
 
 **Removing the need for this step is a high-priority for this project.**
@@ -83,7 +83,7 @@ An example entry for _myuser@mydomain.com_ would be
 ---
 
 ## Basic Usage
-This assumes that all variables and templates are already exactly as you would like them. **This will not be the case!** For more information about customization and options available, *please* read the rest of this README.
+This assumes that all variables and templates are already exactly as you would like them. **This will not be the case!** For more information about customization and options available, *please* read the rest of this README and customize the vars and templates files with information relevant to your mailserver and the domains you wish to host.**
 
 
 #### Host to deploy 
@@ -153,11 +153,11 @@ Any users that you create in the passwd.db file need to appear here in the forma
 
 ## Final Steps
 #### Setting up DKIM for a domain
-You need to add a TXT/SPF entry to your domain's DNS that includes your DKIM public key. The source for this can be found at /etc/opendkim/mail.txt. An example entry would be
+You need to add a TXT/SPF entry to your domain's DNS that includes your DKIM public key. The source for this can be found at /etc/opendkim/mail.txt. An example entry would be  
 ```default._domainkey     IN TXT    "v=DKIM1; h=sha256; k=rsa; s=email; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADC432KBgQDfS9rm7OaBKKEmB4RfAf1dS4/8p+YMurNlF4vW1iqwy5M7/sA3kMpgjJTplmtej2CKotcileHyMI7zWx1tcnVQM5JccCrMAGuRH432i6AvRp45qmikdRX68MIfPypIYtvyYVL83ofdsaT0IDMSv1tfuom+pJ4H9x/GxHeiQjT6wIDAQAB"```
 
 #### SPF 
 An SPF record is the next thing we want to add to our DNS - more information about SPF can be found at https://en.wikipedia.org/wiki/Sender_Policy_Framework and there's a helpful wizard at http://spfwizard.com/
 
-An example SPF record for kfdfsj.uk using mailserver.mydomain.com as a permitted sender would be
+An example SPF record for kfdfsj.uk using mailserver.mydomain.com as a permitted sender would be  
 ```@      IN TXT     "v=spf1 mx a:mailserver.mydomain.com"```
