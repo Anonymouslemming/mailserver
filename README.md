@@ -53,7 +53,7 @@ Key and certificate management is outside of the scope of this documentation, so
 As an example, for a mailserver on mymailserver.mydomain.com, I would download a zip file from StartSSL that contains another zip file named `OtherServer.zip`. This in turn contains
    * root.crt - The root certificate
    * 1_Intermediate.crt - intermediate certificate
-   * 2_mymailserver.mydomain.com - our mailserver's certificate
+   * 2_mymailserver.mydomain.com.crt - our mailserver's certificate
 
 These playbooks allow you to specify the location of these files, and will create a combined certificate as part of the deployment process.
 
@@ -61,16 +61,17 @@ Be warned - StartSSL charge a fee for revoking certificates. This means that whi
 
 ##### Generating key and CSR
 This is not exhaustive, and you should follow your certificate provider's instructions. But this is how I create my key, generate my CSR and remove the password from my key.
-```openssl req -newkey rsa:2048 -keyout mailserver.mydomain.com.key -out mailserver.mydomain.com.csr
+
+`openssl req -newkey rsa:2048 -keyout mailserver.mydomain.com.key -out mailserver.mydomain.com.csr
 openssl rsa -in mailserver.mydomain.com.key -out mailserver.mydomain.com.key.NOPASSWORD
 mv mailserver.mydomain.com.key mailserver.mydomain.com.key.WITHPASSWORD
-mv mailserver.mydomain.com.NOPASSWORD mailserver.mydomain.com.key```
+mv mailserver.mydomain.com.NOPASSWORD mailserver.mydomain.com.key`
 
 These keys **must** be stored securely and protected.
 
 #### Password hashes 
 Each user requires an entry in the `passwd.db` file. This file uses the following format
-```user@domain:generatedhash```
+`user@domain:generatedhash`
 
 Users can generate a hash by running `doveadm pw -s SSHA512` which is available in the dovecot-core package. You will need to install this somewhere that your users can run the command.
 
