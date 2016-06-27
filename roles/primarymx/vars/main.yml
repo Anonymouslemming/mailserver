@@ -1,0 +1,29 @@
+fqdn: primarymx.mydomain.com
+default_domain: mydomain.com
+extra_mail_domains: ["kfdfsj.uk", "hfjdhfufnmds.uk"]
+extra_relay_networks: ["192.168.1.0/24", "10.10.1.0/24"]
+
+# Paths to certificates, keys and passwd file
+# These are not stored in roles/primarymx/files to avoid accidental
+# comitting to source control
+
+cert_files_dir: /home/ansible/mailserver
+cert_paths:
+    intermediate_cert_file:
+        filename: "intermediate_ca.crt"
+        mode: "0440"
+    mail_cert_file:
+        filename: "{{ fqdn }}.crt"
+        mode: "0440"
+    mail_key_file:
+        filename: "{{ fqdn }}.key"
+        mode: "0440"
+    root_cert_file:
+        filename: "root.crt"
+        mode: "0440"
+
+dovecot_passwd_file: /home/ansible/mailserver/passwd.db
+
+# This should not be changed!
+unix_users:
+    - { name: "vmail", uid: "5000", homedir: "/var/mail/vmail" }

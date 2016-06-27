@@ -1,0 +1,4 @@
+default._domainkey.{{ fqdn }} {{ fqdn }}:mail:/etc/opendkim/mail.private
+{% for domain in extra_mail_domains %}
+default._domainkey.{{ domain }} {{ domain }}:default:/etc/opendkim/mail.private
+{% endfor %}

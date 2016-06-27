@@ -1,0 +1,62 @@
+---
+- name: Add users to groups
+  user:
+      name: "{{ item.user }}"
+      groups: "{{ item.groups }}"
+      append: yes
+  with_items:
+      - { user: 'spamass-milter', groups: 'debian-spamd' }
+      - { user: 'postfix', groups: 'debian-spamd' }
+
+- name: Create spamassassin directories
+  file: state=directory path={{ item.path }} owner={{ item.owner }} group={{ item.group }} mode={{ item.mode }}
+  notify: restart spamassassin
+  with_items:
+      - { path: '/var/spool/postfix/spamassassin', owner: 'debian-spamd', group: 'root', mode: '6775' }
+      - { path: '/var/lib/spamassassin/.spamassassin', owner: 'debian-spamd', group: 'debian-spamd', mode: '6770' }
+      - { path: '/var/lib/spamassassin/.razor', owner: 'debian-spamd', group: 'debian-spamd', mode: '6770' }
+      - { path: '/var/lib/spamassassin/.pyzor', owner: 'debian-spamd', group: 'debian-spamd', mode: '6770' }
+      - { path: '/var/lib/spamassassin/.spamassassin', owner: 'debian-spamd', group: 'debian-spamd', mode: '6770' }
+      - { path: '/var/tmp/runonce', owner: 'root', group: 'root', mode: '6770' }
+
+- name: Copy and populate spamassassin templates
+  notify: restart spamassassin
+  template: src={{ item.src }} dest={{ item.dest }} mode={{ item.mode }} owner=root group=root
+  with_items:
+      - {src: "etc_default_spamassassin", dest: "/etc/default/spamassassin", mode: '0644'}
+      - {src: "etc_default_spamass-milter", dest: "/etc/default/spamass-milter", mode: '0644'}
+      - {src: "etc_spamassassin_init.pre", dest: "/etc/spamassassin/init.pre", mode: '0644'}
+      - {src: "etc_spamassassin_local.cf", dest: "/etc/spamassassin/local.cf", mode: '0644'}
+
+- name: Get latest spamassassin updates
+  notify: restart spamassassin
+  become: yes
+  become_user: debian-spamd
+  shell: export SAHOME=/var/lib/spamassassin/ && /usr/bin/sa-update --gpghomedir /var/lib/spamassassin/sa-update-keys
+  args:
+      executable: /bin/bash
+      creates: /var/lib/spamassassin/3.004001
+
+- name: Bootstrap pyzor
+  notify: restart spamassassin
+  become: yes
+  become_user: debian-spamd
+  shell: /usr/bin/pyzor --homedir /var/lib/spamassassin/.pyzor discover
+  args:
+      executable: /bin/bash
+
+- name: Setup razor
+  notify: restart spamassassin
+  become: yes
+  become_user: debian-spamd
+  shell: /usr/bin/razor-admin -home=/var/lib/spamassassin/.razor {{ item }}
+  args:
+      executable: /bin/bash
+  with_items: 
+      - "-register"
+      - "-create"
+      - "-discover"
+
+- name: Set razorhome in razor-agent.conf
+  notify: restart spamassassin
+  lineinfile: dest=/var/lib/spamassassin/.razor/razor-agent.conf line="razorhome = /var/lib/spamassassin/.razor" state=present

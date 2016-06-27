@@ -1,0 +1,19 @@
+---
+- name: Install packages
+  apt: name={{ item }} state=latest
+  with_items:
+      - dovecot-core
+      - dovecot-imapd
+      - dovecot-managesieved
+      - dovecot-pop3d
+      - dovecot-sieve
+      - iptables-persistent
+      - libmail-dkim-perl
+      - opendkim
+      - opendkim-tools
+      - postfix
+      - pyzor
+      - razor
+      - spamass-milter
+      - spamassassin
+      - spamc

@@ -1,0 +1,9 @@
+---
+  - include: packages.yml
+  - include: certs_and_keys.yml
+  - include: dovecot.yml
+  - include: postfix.yml
+  - include: opendkim.yml
+  - include: spamassassin.yml
+  - include: sieve.yml
+  - include: firewall.yml

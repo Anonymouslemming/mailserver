@@ -1,0 +1,3 @@
+{% for domain in extra_mail_domains %}
+{{ domain }} OK
+{% endfor %}

@@ -1,0 +1,41 @@
+---
+- name: Copy key and mailserver cert 
+  copy: src={{ cert_files_dir }}/{{ item.value.filename }} dest=/etc/ssl/private/{{ item.value.filename }} mode={{ item.value.mode }} owner=root group=ssl-cert
+  notify: restart postfix
+  with_dict: "{{cert_paths}}"
+
+# If root cert file and intermediate cert file are set, create concatonated
+# file including both these and our certificate
+- name: Concatonate ca intermediate cert, root cert and our mail cert
+  shell: cat /etc/ssl/private/{{ cert_paths.mail_cert_file.filename }} /etc/ssl/private/{{ cert_paths.intermediate_cert_file.filename }} /etc/ssl/private/{{ cert_paths.root_cert_file.filename }} > /etc/ssl/private/ssl-chain-{{ fqdn }}.pem
+  args:
+      executable: /bin/bash
+      creates: /etc/ssl/private/ssl-chain-{{ fqdn }}.pem
+  when: (cert_paths.root_cert_file is defined and cert_paths.intermediate_cert_file is defined)
+  notify: restart postfix
+
+# If root cert file and intermediate cert file are set, create concatonated
+# file including both these and our certificate
+- name: Concatonate ca intermediate cert and our mail cert
+  shell: cat /etc/ssl/private/{{ cert_paths.mail_cert_file.filename }} /etc/ssl/private/{{ cert_paths.intermediate_cert_file.filename }} > /etc/ssl/private/ssl-chain-{{ fqdn }}.pem
+  args:
+      executable: /bin/bash
+      creates: /etc/ssl/private/ssl-chain-{{ fqdn }}.pem
+  when: (cert_paths.root_cert_file is undefined and cert_paths.intermediate_cert_file is defined)
+  notify: restart postfix
+      
+# If root cert file and intermediate cert file are not set, 
+# create concatonated cert that just consists of our mail certificate
+- name: Add just our mail cert to ssl-chain pem
+  shell: cat /etc/ssl/private/{{ cert_paths.mail_cert_file.filename }} > /etc/ssl/private/ssl-chain-{{ fqdn }}.pem
+  args:
+      executable: /bin/bash
+      creates: /etc/ssl/private/ssl-chain-{{ fqdn }}.pem
+  when: (cert_paths.root_cert_file is not defined and cert_paths.intermediate_cert_file is not defined)
+  notify: restart postfix
+
+- name: Set permissions on ssl files
+  file: path=/etc/ssl/private/{{ item }} state=file mode=0440 group=ssl-cert
+  notify: restart postfix
+  with_items:
+      - "ssl-chain-{{ fqdn }}.pem"

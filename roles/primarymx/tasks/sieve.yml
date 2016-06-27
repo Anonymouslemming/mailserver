@@ -1,0 +1,20 @@
+---
+- name: Create sieve directories
+  file: state=directory path={{ item.path }} owner={{ item.owner }} group={{ item.group }} mode={{ item.mode }}
+  notify: restart spamassassin
+  with_items:
+      - { path: '/var/mail/vmail/sieve-after', owner: 'vmail', group: 'vmail', mode: '6770' }
+      - { path: '/var/mail/vmail/sieve-before', owner: 'vmail', group: 'vmail', mode: '6770' }
+
+- name: Copy and populate sieve templates
+  template: src={{ item.src }} dest={{ item.dest }} mode={{ item.mode }} owner=vmail group=vmail
+  with_items:
+      - {src: "var_mail_vmail_sieve-before_masterfilter.sieve", dest: "/var/mail/vmail/sieve-before/masterfilter.sieve", mode: '0644'}
+
+- name: Build sieve bin files
+  become: yes
+  become_user: vmail
+  shell: /usr/bin/sievec /var/mail/vmail/sieve-before/masterfilter.sieve
+  args:
+      executable: /bin/bash
+      chdir: /var/mail/vmail/sieve-before

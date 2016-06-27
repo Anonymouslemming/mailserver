@@ -1,0 +1,7 @@
+---
+- name: Copy templates
+  template: src={{ item.src }} dest={{ item.dest }} owner=root group=root mode={{ item.mode }}
+  with_items:
+      - { src: 'etc_iptables_rules.v4', dest: '/etc/iptables/rules.v4', mode: '0644' }
+  notify:
+      - reload iptables rules

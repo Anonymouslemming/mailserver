@@ -1,0 +1,38 @@
+---
+- name: restart dovecot
+  service: name=dovecot state=restarted
+
+- name: restart opendkim
+  service: name=opendkim state=restarted
+
+- name: restart postfix
+  service: name=postfix state=restarted
+
+- name: restart spamassassin
+  service: name=spamassassin state=restarted
+  notify: restart spamass-milter
+
+- name: restart spamass-milter
+  service: name=spamass-milter state=restarted
+
+- name: reload iptables rules
+  shell: /sbin/iptables-restore < /etc/iptables/rules.v4
+  args:
+      executable: /bin/bash
+
+- name: update aliases
+  shell: /usr/bin/newaliases
+  args:
+      executable: /bin/bash
+  notify: restart postfix
+
+- name: postmap files
+  shell: /usr/sbin/postmap /etc/postfix/{{ item }}
+  args:
+      executable: /bin/bash
+  with_items:
+      - canonical
+      - virtual
+      - virtual-mailbox-domains
+      - virtual-mailbox-users
+  notify: update aliases

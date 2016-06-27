@@ -1,0 +1,17 @@
+*filter
+:INPUT DROP [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [1026:110416]
+-A INPUT -i lo -j ACCEPT
+-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+-A INPUT -s {{ ansible_default_ipv4.network }}/{{ ansible_default_ipv4.netmask }} -i {{ ansible_default_ipv4.alias }} -j ACCEPT
+-A INPUT -i {{ ansible_default_ipv4.alias }} -p tcp --dport 22 -j ACCEPT
+-A INPUT -i {{ ansible_default_ipv4.alias }} -p tcp --dport 25 -j ACCEPT
+-A INPUT -i {{ ansible_default_ipv4.alias }} -p tcp --dport 80 -j ACCEPT
+-A INPUT -i {{ ansible_default_ipv4.alias }} -p tcp --dport 80 -j ACCEPT
+-A INPUT -i {{ ansible_default_ipv4.alias }} -p tcp --dport 143 -j ACCEPT
+-A INPUT -i {{ ansible_default_ipv4.alias }} -p tcp --dport 587 -j ACCEPT
+-A INPUT -i {{ ansible_default_ipv4.alias }} -p tcp --dport 993 -j ACCEPT
+-A INPUT -i {{ ansible_default_ipv4.alias }} -p tcp --dport 4190 -j ACCEPT
+-A INPUT -j DROP
+COMMIT

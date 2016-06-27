@@ -1,0 +1,5 @@
+---
+- hosts: myprimarymx
+  become: yes
+  roles:
+      - primarymx

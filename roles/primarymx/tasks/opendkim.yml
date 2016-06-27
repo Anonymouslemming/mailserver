@@ -1,0 +1,39 @@
+---
+- name: Create opendkim config and socket directories
+  file: state=directory path={{ item.path }} owner={{ item.owner }} group={{ item.group }} mode={{ item.mode }}
+  notify: restart opendkim
+  with_items:
+      - { path: '/etc/opendkim', owner: 'opendkim', group: 'opendkim', mode: '0750' }
+      - { path: '/var/spool/postfix/opendkim', owner: 'opendkim', group: 'opendkim', mode: '6771' }
+
+- name: Generate OpenDKIM key
+  shell: /usr/bin/opendkim-genkey -r -h sha256 -d /etc/opendkim/{{ fqdn }} -s mail
+  args:
+      executable: /bin/bash
+      creates: /etc/opendkim/mail.private
+      chdir: /etc/opendkim
+  notify: restart opendkim
+
+- name: Set ownership and permission on private key
+  file: path=/etc/opendkim/mail.private owner=opendkim group=root mode=0600
+  notify: restart opendkim
+
+- name: Copy and populate opendkim templates
+  template: src={{ item.src }} dest={{ item.dest }} mode={{ item.mode }} owner=opendkim group=opendkim
+  notify: restart opendkim
+  with_items:
+      - {src: "etc_opendkim_KeyTable", dest: "/etc/opendkim/KeyTable", mode: '0640'}
+      - {src: "etc_opendkim_SigningTable", dest: "/etc/opendkim/SigningTable", mode: '0640'}
+      - {src: "etc_opendkim_TrustedHosts", dest: "/etc/opendkim/TrustedHosts", mode: '0640'}
+      - {src: "etc_opendkim.conf", dest: "/etc/opendkim.conf", mode: '0640'}
+      - {src: "etc_default_opendkim", dest: "/etc/default/opendkim", mode: '0644'}
+
+- name: Add users to groups
+  notify: restart opendkim
+  user:
+      name: "{{ item.user }}"
+      groups: "{{ item.groups }}"
+      append: yes
+  with_items:
+      - { user: 'postfix', groups: 'opendkim' }
+

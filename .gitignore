@@ -1,0 +1,9 @@
+# Ignore key and cert related files
+*crt
+*csr
+*key
+*pem
+passwd.db
+
+# Ignore ansible retry files
+*.retry
