@@ -62,10 +62,10 @@ Be warned - StartSSL charge a fee for revoking certificates. This means that whi
 ##### Generating key and CSR
 This is not exhaustive, and you should follow your certificate provider's instructions. But this is how I create my key, generate my CSR and remove the password from my key.
 
-`openssl req -newkey rsa:2048 -keyout mailserver.mydomain.com.key -out mailserver.mydomain.com.csr
-openssl rsa -in mailserver.mydomain.com.key -out mailserver.mydomain.com.key.NOPASSWORD
-mv mailserver.mydomain.com.key mailserver.mydomain.com.key.WITHPASSWORD
-mv mailserver.mydomain.com.NOPASSWORD mailserver.mydomain.com.key`
+```$ openssl req -newkey rsa:2048 -keyout mailserver.mydomain.com.key -out mailserver.mydomain.com.csr
+$ openssl rsa -in mailserver.mydomain.com.key -out mailserver.mydomain.com.key.NOPASSWORD
+$ mv mailserver.mydomain.com.key mailserver.mydomain.com.key.WITHPASSWORD
+$ mv mailserver.mydomain.com.NOPASSWORD mailserver.mydomain.com.key```
 
 These keys **must** be stored securely and protected.
 
